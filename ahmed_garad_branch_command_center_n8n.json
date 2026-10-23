@@ -1,0 +1,69 @@
+{
+  "name": "Ahmed Garad AI | غرفة قيادة الفرع البنكي",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "4c4e9a8a-27b3-4a9a-8f22-18d41bb2b1a1",
+      "name": "تشغيل غرفة القيادة يدوياً",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// غرفة قيادة الفرع البنكي - نموذج أولي مستقل للاستيراد في n8n\n// مهم: لا توجد اتصالات خارجية في هذا الإصدار. القيم التشغيلية التجريبية موسومة بوضوح.\n// عدّل قسم CONFIG بعد الاستيراد، ثم اربط مصادر بيانات معتمدة قبل الاعتماد على النتائج.\n\nconst CONFIG = {\n  branchName: \"فرع تجريبي - عدّل اسم الفرع\",\n  currency: \"EGP\",\n  dataStatus: \"DEMO_ONLY\",\n  targets: {\n    customerWaitingMinutes: 10,\n    dailySalesPerEmployeeEGP: 116000\n  },\n  // قيم توضيحية فقط وليست قراءة فعلية من أنظمة البنك\n  demoActuals: {\n    customerWaitingMinutes: 80,\n    dailySalesEGP: 348000,\n    dailySalesTargetEGP: 580000,\n    customersServed: 42,\n    pendingCases: 12\n  },\n  staff: {\n    customerService: [\n      { name: \"كريستين\", role: \"خدمة عملاء\", status: \"غير محدد\" },\n      { name: \"مارينا\", role: \"خدمة عملاء\", status: \"غير محدد\" },\n      { name: \"منة الله\", role: \"خدمة عملاء\", status: \"غير محدد\" },\n      { name: \"مروان\", role: \"خدمة عملاء\", status: \"غير محدد\" }\n    ],\n    tellers: [\n      { name: \"محمد عبد السلام\", role: \"صراف\", status: \"غير محدد\" },\n      { name: \"عبد الرحمن\", role: \"صراف\", status: \"غير محدد\" },\n      { name: \"إشراق\", role: \"صراف\", status: \"غير محدد\" },\n      { name: \"مينا\", role: \"صراف\", status: \"غير محدد\" },\n      { name: \"نوران\", role: \"صراف\", status: \"غير محدد\" }\n    ],\n    reception: [\n      { name: \"سارة\", role: \"استقبال / سفير رقمي\", status: \"غير محدد\" }\n    ],\n    corporate: [\n      { name: \"كلارا\", role: \"خدمة الشركات\", status: \"غير محدد\" }\n    ],\n    coordination: [\n      { name: \"هيلانة\", role: \"منسق أعمال\", status: \"غير محدد\" }\n    ]\n  }\n};\n\nconst a = CONFIG.demoActuals;\nconst salesAchievementPct = a.dailySalesTargetEGP > 0\n  ? Math.round((a.dailySalesEGP / a.dailySalesTargetEGP) * 10000) / 100\n  : 0;\nconst allStaff = [\n  ...CONFIG.staff.customerService,\n  ...CONFIG.staff.tellers,\n  ...CONFIG.staff.reception,\n  ...CONFIG.staff.corporate,\n  ...CONFIG.staff.coordination\n];\n\nreturn [{\n  json: {\n    dashboard: \"Ahmed Garad AI - Branch Command Center\",\n    branchName: CONFIG.branchName,\n    generatedAt: new Date().toISOString(),\n    dataStatus: CONFIG.dataStatus,\n    warning: \"هذه نتيجة نموذجية للتجربة فقط؛ لا توجد قراءة مباشرة من البنك أو Google Sheets.\",\n    currency: CONFIG.currency,\n    kpis: {\n      customerWaitingMinutes: {\n        value: a.customerWaitingMinutes,\n        target: CONFIG.targets.customerWaitingMinutes,\n        status: a.customerWaitingMinutes <= CONFIG.targets.customerWaitingMinutes ? \"on_target\" : \"above_target\",\n        unit: \"minutes\",\n        dataStatus: CONFIG.dataStatus\n      },\n      dailySales: {\n        actual: a.dailySalesEGP,\n        target: a.dailySalesTargetEGP,\n        achievementPercent: salesAchievementPct,\n        remainingToTarget: Math.max(0, a.dailySalesTargetEGP - a.dailySalesEGP),\n        currency: CONFIG.currency,\n        dataStatus: CONFIG.dataStatus\n      },\n      customersServed: { value: a.customersServed, dataStatus: CONFIG.dataStatus },\n      pendingCases: { value: a.pendingCases, dataStatus: CONFIG.dataStatus },\n      staffCount: allStaff.length\n    },\n    teams: CONFIG.staff,\n    staffRoster: allStaff,\n    nextSteps: [\n      \"استبدل demoActuals ببيانات معتمدة من مصدر البنك أو ملف تجريبي تملكه.\",\n      \"اربط Google Sheets أو مصدر البيانات المناسب باستخدام بيانات اعتماد تُنشأ داخل n8n؛ لا تضع مفاتيح API داخل الكود.\",\n      \"اختبر كل مصدر ومخرجاته قبل تفعيل أي تشغيل مجدول.\",\n      \"لا تستخدم هذا النموذج لاتخاذ قرارات ائتمانية أو تشغيلية فعلية قبل التحقق والموافقة.\"\n    ]\n  }\n}];"
+      },
+      "id": "f06f2c1e-19c7-49e1-ae68-2a0bba4c2d55",
+      "name": "إنشاء مؤشرات غرفة القيادة (بيانات تجريبية)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## غرفة قيادة الفرع البنكي - نموذج أولي\n- يعمل يدوياً من زر Execute workflow.\n- المخرجات تشمل مؤشرات انتظار العملاء والمبيعات والحالات المعلقة وفرق العمل.\n- جميع القيم التشغيلية الحالية تجريبية وموسومة DEMO_ONLY.\n- لا توجد اتصالات خارجية أو بيانات اعتماد مضمنة.\n- قبل الاستخدام الفعلي: اربط مصدراً معتمداً واختبر البيانات والصلاحيات.",
+        "height": 300,
+        "width": 420,
+        "color": 5
+      },
+      "id": "ef6cb5c7-7ad8-4a2d-a40e-0e5e9c9fd57a",
+      "name": "ملاحظات مهمة",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -80
+      ]
+    }
+  ],
+  "connections": {
+    "تشغيل غرفة القيادة يدوياً": {
+      "main": [
+        [
+          {
+            "node": "إنشاء مؤشرات غرفة القيادة (بيانات تجريبية)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "34075909-b683-4ce8-9777-3f9d0504a779",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Standalone demo workflow for a bank branch command center. No external credentials or connections."
+  },
+  "tags": []
+}
